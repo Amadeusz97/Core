@@ -50,7 +50,7 @@
 
 /* USER CODE BEGIN PV */
 float value,value2;
-int value1;
+int value1,value3=0,value4;
 char buffer[40];
 uint8_t size;
 /* USER CODE END PV */
@@ -103,30 +103,39 @@ int main(void)
   /* USER CODE BEGIN 2 */
   HAL_ADC_Start(&hadc1);
   HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_3);
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+	  for(int i=0; i<20;i++){
+		  HAL_ADC_Start(&hadc1);
 	  if (HAL_ADC_PollForConversion(&hadc1, 100) == HAL_OK) {
-
 	  value = HAL_ADC_GetValue(&hadc1);
 	  value2 = value*0.00080566;
 	  value1 = (value2*4630.0)/(3.3-value2);
-	  size = sprintf(buffer, "Value: %d [mV]\n\r", value);
+	  value3 +=value1;
+	  }}
+	  value4 = value3/20;
+	  size = sprintf(buffer, "Value: %d [mV]\n\r", value3);
 	  HAL_UART_Transmit(&huart3, (uint8_t*)buffer, size, 200);
-	  HAL_Delay(200);
+	  HAL_Delay(2);
+	  value3 =0;
 
-__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, 90);
+__HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, 5);
 
-	   HAL_ADC_Start(&hadc1);
+
 	  }
+
+
+
 
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-  }
+
   /* USER CODE END 3 */
 }
 
