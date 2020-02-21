@@ -122,8 +122,7 @@ __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, 90);
 
 	   HAL_ADC_Start(&hadc1);
 	  }
-	  zmiany?
-hh
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
