@@ -26,11 +26,10 @@
 #include "usart.h"
 #include "usb_otg.h"
 #include "gpio.h"
-#include "arm_math.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "arm_math.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -55,12 +54,21 @@ int value1,value3=0,value4,error;
 char buffer[40];
 int PWM,Wzadana=2000;
 uint8_t size;
+uint8_t Received[4];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 
+HAL_UART_Receive_IT(&huart3, &Received, 4);
+ // Odebrany znak zostaje przekonwertowany na liczbe calkowita i sprawdzony
+ // instrukcja warunkowa
+Wzadana = (atoi(&Received));
+
+// HAL_UART_Receive_IT(&huart3, &Received, 4); // Ponowne włączenie nasłuchiwania
+}
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -82,7 +90,7 @@ int main(void)
   /* MCU Configuration--------------------------------------------------------*/
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
-   HAL_Init();
+  HAL_Init();
 
   /* USER CODE BEGIN Init */
 
@@ -106,17 +114,19 @@ int main(void)
   HAL_ADC_Start(&hadc1);
   HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_3);
   arm_pid_instance_f32 PID;
-  PID.Kp = 0.005;
-  PID.Ki = 0.003;
-  PID.Kd = 0.002;
+  PID.Kp = 0.04;
+  PID.Ki = 0.009;
+  PID.Kd = 0.0;
   arm_pid_init_f32(&PID,1);
+  HAL_UART_Receive_IT(&huart3, &Received, 4);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  for(int i=0; i<200;i++){
+
+	  for(int i=0; i<100;i++){
 		  HAL_ADC_Start(&hadc1);
 		  if (HAL_ADC_PollForConversion(&hadc1, 100) == HAL_OK) {
 			  value = HAL_ADC_GetValue(&hadc1);
@@ -125,7 +135,7 @@ int main(void)
 			  value3 +=value1;
 		  }
 	  }
-	  value4 = value3/200;
+	  value4 = value3/100;
 	  value3 =0;
 	  size = sprintf(buffer, "Value: %d [Ohm]\n\r", value4);
 	  HAL_UART_Transmit(&huart3, (uint8_t*)buffer, size, 200);
@@ -133,13 +143,13 @@ int main(void)
 
 	  error = value4-Wzadana;
 	  PWM = arm_pid_f32(&PID,error);
-	  if (PWM > 100) {
-	                  PWM = 100;
+	  if (PWM > 1000) {
+	                  PWM = 1000;
 	                 // PID.state[2] = 100;
 
 	              }
-	  else if (PWM < 10) {
-	                  PWM = 10;
+	  else if (PWM < 60) {
+	                  PWM = 60;
 	                //  PID.state[2] = 0;
 	              }
 	  __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, PWM);
