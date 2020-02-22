@@ -142,6 +142,21 @@ int main(void)
 	  HAL_Delay(20);
 
 	  error = value4-Wzadana;
+	  if(abs(error) <= 28){
+		  HAL_GPIO_WritePin(G_GPIO_Port, G_Pin, GPIO_PIN_SET);
+		  HAL_GPIO_WritePin(R_GPIO_Port, R_Pin, GPIO_PIN_RESET);
+		  HAL_GPIO_WritePin(B_GPIO_Port, B_Pin, GPIO_PIN_RESET);
+	  }
+	  else if(abs(error) >28 && abs(error) <=138){
+		  	  	  HAL_GPIO_WritePin(B_GPIO_Port, B_Pin, GPIO_PIN_SET);
+				  HAL_GPIO_WritePin(R_GPIO_Port, R_Pin, GPIO_PIN_RESET);
+				  HAL_GPIO_WritePin(G_GPIO_Port, G_Pin, GPIO_PIN_RESET);
+	  }
+	  else if( abs(error) >138){
+			  	  	  HAL_GPIO_WritePin(R_GPIO_Port, R_Pin, GPIO_PIN_SET);
+					  HAL_GPIO_WritePin(B_GPIO_Port, B_Pin, GPIO_PIN_RESET);
+					  HAL_GPIO_WritePin(G_GPIO_Port, G_Pin, GPIO_PIN_RESET);
+		  }
 	  PWM = arm_pid_f32(&PID,error);
 	  if (PWM > 1000) {
 	                  PWM = 1000;
