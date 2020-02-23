@@ -53,25 +53,37 @@ float value,value2,dioda;
 int value1,value3=0,value4,error;
 char buffer[40];
 int PWM,Wzadana=2000;
-uint8_t size;
-uint8_t Received[4];
+uint8_t size,Received[6],dane[4];
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
+	HAL_UART_Receive_IT(&huart3, &Received, 6);
+	if (Received[0]=='&'&& Received[5]=='*')
+	{
+		if ( (Received[1]>47) && (Received[1]<58) && (Received[2]>47) && (Received[2]<58) &&  (Received[3]>47) && (Received[3]<58) &&  (Received[4]>47) && (Received[4]<58) ){
+		for(int i =0; i<=4;i++){
+			dane[i]= Received[i+1];
+		}
 
-HAL_UART_Receive_IT(&huart3, &Received, 4);
- // Odebrany znak zostaje przekonwertowany na liczbe calkowita i sprawdzony
- // instrukcja warunkowa
-if (Received[0]=='1'||Received[0]=='2'||Received[0]=='3'||Received[0]=='4')
-{
-Wzadana = (atoi(&Received));
+	Wzadana = atoi(&dane);
+	}
+	}
+
+
+	for(int i =0;i<=3;i++){
+		Received[i] = 0;
+	}
+
 }
+
+
 
 // HAL_UART_Receive_IT(&huart3, &Received, 4); // Ponowne włączenie nasłuchiwania
-}
+
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -121,7 +133,7 @@ int main(void)
   PID.Ki = 0.009;
   PID.Kd = 0.0;
   arm_pid_init_f32(&PID,1);
-  HAL_UART_Receive_IT(&huart3, &Received, 4);
+  HAL_UART_Receive_IT(&huart3, &Received, 6);
   /* USER CODE END 2 */
 
   /* Infinite loop */
