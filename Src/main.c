@@ -49,7 +49,7 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-float value,value2;
+float value,value2,dioda;
 int value1,value3=0,value4,error;
 char buffer[40];
 int PWM,Wzadana=2000;
@@ -65,7 +65,10 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 HAL_UART_Receive_IT(&huart3, &Received, 4);
  // Odebrany znak zostaje przekonwertowany na liczbe calkowita i sprawdzony
  // instrukcja warunkowa
+if (Received[0]=='1'||Received[0]=='2'||Received[0]=='3'||Received[0]=='4')
+{
 Wzadana = (atoi(&Received));
+}
 
 // HAL_UART_Receive_IT(&huart3, &Received, 4); // Ponowne włączenie nasłuchiwania
 }
@@ -142,17 +145,18 @@ int main(void)
 	  HAL_Delay(20);
 
 	  error = value4-Wzadana;
-	  if(abs(error) <= 28){
+	  dioda =  (abs(error)*1.000) /Wzadana*1.00;
+	  if(dioda <= 0.01){
 		  HAL_GPIO_WritePin(G_GPIO_Port, G_Pin, GPIO_PIN_SET);
 		  HAL_GPIO_WritePin(R_GPIO_Port, R_Pin, GPIO_PIN_RESET);
 		  HAL_GPIO_WritePin(B_GPIO_Port, B_Pin, GPIO_PIN_RESET);
 	  }
-	  else if(abs(error) >28 && abs(error) <=138){
+	  else if(dioda >0.01 && dioda <=0.05){
 		  	  	  HAL_GPIO_WritePin(B_GPIO_Port, B_Pin, GPIO_PIN_SET);
 				  HAL_GPIO_WritePin(R_GPIO_Port, R_Pin, GPIO_PIN_RESET);
 				  HAL_GPIO_WritePin(G_GPIO_Port, G_Pin, GPIO_PIN_RESET);
 	  }
-	  else if( abs(error) >138){
+	  else if( dioda >0.05){
 			  	  	  HAL_GPIO_WritePin(R_GPIO_Port, R_Pin, GPIO_PIN_SET);
 					  HAL_GPIO_WritePin(B_GPIO_Port, B_Pin, GPIO_PIN_RESET);
 					  HAL_GPIO_WritePin(G_GPIO_Port, G_Pin, GPIO_PIN_RESET);
