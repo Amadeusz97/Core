@@ -53,7 +53,7 @@ float value,value2,dioda;
 int value1,value3=0,value4,error;
 char buffer[40];
 int PWM,Wzadana=2000;
-uint8_t size,Received[6],dane[4];
+uint8_t size,Received,dane[6],daneint[4];
 
 /* USER CODE END PV */
 
@@ -61,23 +61,55 @@ uint8_t size,Received[6],dane[4];
 void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
-	HAL_UART_Receive_IT(&huart3, &Received, 6);
-	if (Received[0]=='&'&& Received[5]=='*')
-	{
-		if ( (Received[1]>47) && (Received[1]<58) && (Received[2]>47) && (Received[2]<58) &&  (Received[3]>47) && (Received[3]<58) &&  (Received[4]>47) && (Received[4]<58) ){
-		for(int i =0; i<=4;i++){
-			dane[i]= Received[i+1];
-		}
-
-	Wzadana = atoi(&dane);
-	}
+	HAL_UART_Receive_IT(&huart3, &Received, 1);
+	for(int i =0; i==0; i++){
+	if (Received=='&' && dane[0]==0) {
+		dane[0] = '&';
+		break;
 	}
 
 
-	for(int i =0;i<=3;i++){
-		Received[i] = 0;
+	 if (Received>47 && Received<58 && dane[0] =='&' && dane[1]==0) {
+		dane[1] = Received;
+		break;
 	}
 
+
+	else if (Received>47 && Received<58 && dane[0] =='&' && dane[1]!=0 && dane[2] ==0) {
+				dane[2] = Received;
+				break;
+			}
+
+
+	else if ( Received>47 && Received<58 && dane[0] =='&' && dane[1]!=0 && dane[2] !=0 && dane[3]==0) {
+					dane[3] = Received;
+					break;
+				}
+
+
+	else if (Received>47 && Received<58 && dane[0] =='&' && dane[1]!=0 && dane[2] !=0 && dane[3]!=0 && dane[4]==0) {
+					dane[4] = Received;
+					break;
+				}
+
+
+	else if ( Received =='*' && dane[0] =='&' && dane[1]!=0 && dane[2] !=0 && dane[3]!=0 && dane[4]!=0 )
+							{
+					for(int i =0; i<=3; i++){
+						daneint[i] = dane[i+1];
+						Wzadana = atoi(&daneint);
+					}
+					for(int i =0; i<=5; i++){
+						dane[i] =0;
+					}
+					break;
+				}
+		else {
+					for(int i =0; i<=5; i++){
+											dane[i] = 0;
+										}}
+
+	}
 }
 
 
@@ -133,7 +165,7 @@ int main(void)
   PID.Ki = 0.009;
   PID.Kd = 0.0;
   arm_pid_init_f32(&PID,1);
-  HAL_UART_Receive_IT(&huart3, &Received, 6);
+  HAL_UART_Receive_IT(&huart3, &Received, 1);
   /* USER CODE END 2 */
 
   /* Infinite loop */
